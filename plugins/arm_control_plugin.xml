@@ -1,0 +1,20 @@
+<library path="src">
+    <class name="Arm Control Plugin" type="arm_control_plugin.arm_control.MyPlugin" base_class_type="rqt_gui_py::Plugin">
+        <description>
+            An rqt plugin featuring sliders to display and control the position the rover's arm.
+        </description>
+        <qtgui>
+            <!-- optional grouping...
+            <group>
+              <label>Group</label>
+            </group>
+            <group>
+              <label>Subgroup</label>
+            </group>
+            -->
+            <label>Arm Testing</label>
+            <icon type="theme">system-help</icon>
+            <statustip>Something about user interfaces.</statustip>
+        </qtgui>
+    </class>
+</library>
