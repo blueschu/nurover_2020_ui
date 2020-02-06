@@ -26,12 +26,12 @@ class _SiteStatus(Enum):
 
 
 _pixel_map_cache = {
-    (_SiteStatus.Empty, False): QPixmap(os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_EMPTY)),
-    (_SiteStatus.Filled, False): QPixmap(os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_FILLED)),
-    (_SiteStatus.Used, False): QPixmap(os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_USED)),
-    (_SiteStatus.Empty, True): QPixmap(os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_EMPTY_ACTIVE)),
-    (_SiteStatus.Filled, True): QPixmap(os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_FILLED_ACTIVE)),
-    (_SiteStatus.Used, True): QPixmap(os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_USED_ACTIVE)),
+    (_SiteStatus.Empty, False): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_EMPTY),
+    (_SiteStatus.Filled, False): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_FILLED),
+    (_SiteStatus.Used, False): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_USED),
+    (_SiteStatus.Empty, True): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_EMPTY_ACTIVE),
+    (_SiteStatus.Filled, True): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_FILLED_ACTIVE),
+    (_SiteStatus.Used, True): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_USED_ACTIVE),
 }
 
 
@@ -54,4 +54,4 @@ class CollectionSite(object):
         return "{}_{}".format(settings.OBJECT_NAMES.collection_site_label, self.index)
 
     def pixmap(self, active):
-        return _pixel_map_cache[(self.status, active)]
+        return QPixmap(_pixel_map_cache[(self.status, active)])
