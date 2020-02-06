@@ -19,26 +19,26 @@ _PIXEL_MAP_USED_ACTIVE = 'empty_active.png'
 
 
 @unique
-class _SiteStatus(Enum):
+class SiteStatus(Enum):
     Empty = 1
     Filled = 2
     Used = 3
 
 
 _pixel_map_cache = {
-    (_SiteStatus.Empty, False): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_EMPTY),
-    (_SiteStatus.Filled, False): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_FILLED),
-    (_SiteStatus.Used, False): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_USED),
-    (_SiteStatus.Empty, True): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_EMPTY_ACTIVE),
-    (_SiteStatus.Filled, True): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_FILLED_ACTIVE),
-    (_SiteStatus.Used, True): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_USED_ACTIVE),
+    (SiteStatus.Empty, False): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_EMPTY),
+    (SiteStatus.Filled, False): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_FILLED),
+    (SiteStatus.Used, False): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_USED),
+    (SiteStatus.Empty, True): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_EMPTY_ACTIVE),
+    (SiteStatus.Filled, True): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_FILLED_ACTIVE),
+    (SiteStatus.Used, True): os.path.join(settings.RESOURCE_PATH, _PIXEL_MAP_USED_ACTIVE),
 }
 
 
 class CollectionSite(object):
 
     def __init__(self, index, actuator_position):
-        self.status = _SiteStatus.Empty
+        self.status = SiteStatus.Empty
         self.actuator_position = actuator_position
         self.index = index
 
@@ -52,6 +52,18 @@ class CollectionSite(object):
     @property
     def label_name(self):
         return "{}_{}".format(settings.OBJECT_NAMES.collection_site_label, self.index)
+
+    @property
+    def is_empty(self):
+        return self.status == SiteStatus.Empty
+
+    @property
+    def is_filled(self):
+        return self.status == SiteStatus.Filled
+
+    @property
+    def is_used(self):
+        return self.status == SiteStatus.Used
 
     def pixmap(self, active):
         return QPixmap(_pixel_map_cache[(self.status, active)])

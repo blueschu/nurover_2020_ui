@@ -104,6 +104,9 @@
             <property name="text">
              <string>Select</string>
             </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
+            </property>
            </widget>
           </item>
          </layout>
@@ -129,6 +132,9 @@
            <widget class="QPushButton" name="collection_site_button_4">
             <property name="text">
              <string>Select</string>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -245,12 +251,21 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="control_button_vacuum">
             <property name="text">
-             <string>Not Running</string>
+             <string comment="Dis" extracomment="Coment">Not Running</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <property name="autoRepeat">
+             <bool>false</bool>
+            </property>
+            <property name="default">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -262,7 +277,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QPushButton" name="pushButton_4">
+           <widget class="QPushButton" name="control_button_valve">
             <property name="text">
              <string>Closed</string>
             </property>
@@ -285,7 +300,7 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QPushButton" name="pushButton_6">
+           <widget class="QPushButton" name="control_button_vibration">
             <property name="text">
              <string>Not Running</string>
             </property>
@@ -302,7 +317,7 @@
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QPushButton" name="pushButton_8">
+           <widget class="QPushButton" name="control_button_pump">
             <property name="text">
              <string>Not Running</string>
             </property>
@@ -314,7 +329,7 @@
          </layout>
         </item>
         <item alignment="Qt::AlignRight">
-         <widget class="QPushButton" name="pushButton_9">
+         <widget class="QPushButton" name="button_reset_collection_states">
           <property name="text">
            <string>Reset Collection States</string>
           </property>

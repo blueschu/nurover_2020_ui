@@ -54,6 +54,7 @@ class MyPlugin(Plugin):
             for name_index, actuator_position in enumerate(settings.COLLECTION_SITE_POSITIONS, start=1)
         ]
         self.active_collection_site = self.collection_sites[0]
+        self.dirt_in_vacuum_chamber = False
 
         # for i, attr in enumerate(generate_actuator_button_names()):
         #     getattr(self._widget, attr).clicked[bool].connect(self.on_actuator_button_click(i))
@@ -71,7 +72,23 @@ class MyPlugin(Plugin):
                 self.on_collection_site_select(site)
             )
 
+        # Register signals for the "important routine" button
         self.get_widget_attr(settings.OBJECT_NAMES.routine_button['important']).clicked.connect(self.on_click_important)
+
+        self.get_widget_attr(settings.OBJECT_NAMES.reset_collection_states_button).clicked.connect(
+            self.on_click_reset_collection_states
+        )
+
+        # Signals for all of the manual control toggles
+        for button_key, object_name in settings.OBJECT_NAMES.control_button.items():
+            self.get_widget_attr(object_name).toggled.connect(
+                # Generate the method name that is responsible for handling the toggle signal for the current button
+                getattr(self, 'on_toggle_control_{}'.format(button_key))
+            )
+
+        self.get_widget_attr(settings.OBJECT_NAMES.control_button['vacuum']).toggled.connect(
+            self.on_toggle_control_vacuum
+        )
 
     def shutdown_plugin(self):
         # TODO unregister all publishers here
@@ -118,8 +135,74 @@ class MyPlugin(Plugin):
             random.choice(settings.IMPORTANT_MESSAGES)
         )
 
+    def on_click_reset_collection_states(self):
+        for site in self.collection_sites:
+            site.status = collection_sites.SiteStatus.Empty
+        self.refresh_collection_site_pixmaps()
+
+    def on_toggle_control_vacuum(self, checked):
+        button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['vacuum'])
+        if checked:
+            button.setText("Running")
+            self.undetermined_pub.publish("Running vacuum")
+
+            # If the valve is currently close, register that there is now dirt in the vacuum chamber
+            if not self.check_control_on('valve'):
+                self.dirt_in_vacuum_chamber = True
+        else:
+            button.setText("Not Running")
+            self.undetermined_pub.publish("Stopping vacuum")
+
+    def on_toggle_control_valve(self, checked):
+        button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['valve'])
+        if checked:
+            button.setText("Open")
+            self.undetermined_pub.publish("Opening Valve")
+
+            # If there is dirt currently in the vacuum, register that is is now in the active collection site
+            if self.dirt_in_vacuum_chamber and self.active_collection_site.is_empty:
+                self.active_collection_site.status = collection_sites.SiteStatus.Filled
+                self.refresh_collection_site_pixmaps()
+                self.dirt_in_vacuum_chamber = False
+        else:
+            button.setText("Closed")
+            self.undetermined_pub.publish("Closing Valve")
+
+    def on_toggle_control_vibration(self, checked):
+        button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['vibration'])
+        if checked:
+            button.setText("Running")
+            self.undetermined_pub.publish("Running vibration motors")
+        else:
+            button.setText("Not Running")
+            self.undetermined_pub.publish("Stopping vibration motors")
+
+    def on_toggle_control_pump(self, checked):
+        button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['pump'])
+        if checked:
+            button.setText("Running")
+            self.undetermined_pub.publish("Running pump")
+
+            if self.active_collection_site.is_filled:
+                self.active_collection_site.status = collection_sites.SiteStatus.Used
+                self.refresh_collection_site_pixmaps()
+        else:
+            button.setText("Not Running")
+            self.undetermined_pub.publish("Stopping pump")
+
+
+    def check_control_on(self, button_name):
+        """
+        Check whether the control button with the given button name is currently checked
+        """
+        return self.get_widget_attr(settings.OBJECT_NAMES.control_button[button_name]).isChecked()
+
     def get_widget_attr(self, attr):
         return getattr(self._widget, attr)
+
+    def splash_status_message(self, message):
+        # TODO
+        pass
 
     # def on_slider_change(self, position):
     #     m = msg.UInt8(ACTUATOR_BUTTON_VALUES[position])
@@ -129,4 +212,3 @@ class MyPlugin(Plugin):
     # Comment in to signal that the plugin has a way to configure
     # This will enable a setting button (gear icon) in each dock widget title bar
     # Usually used to open a modal configuration dialog
-

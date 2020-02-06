@@ -14,9 +14,14 @@ class _RosTopics(object):
 
 
 class _ObjectNames(object):
+    """
+    Mapping to the Qt object names of the various widgets used by this plugin.
+    """
     collection_site_label = 'collection_site_label'
 
     collection_site_button = 'collection_site_button'
+
+    reset_collection_states_button = 'button_reset_collection_states'
 
     routine_button = {
         'collect': 'routine_button_collect',
@@ -24,6 +29,14 @@ class _ObjectNames(object):
         'runtest': 'routine_button_runtest',
         'important': 'routine_button_important',
     }
+
+    control_button = {
+        'vacuum': 'control_button_vacuum',
+        'valve': 'control_button_valve',
+        'vibration': 'control_button_vibration',
+        'pump': 'control_button_pump',
+    }
+
 
 
 ROS_TOPICS = _RosTopics()
