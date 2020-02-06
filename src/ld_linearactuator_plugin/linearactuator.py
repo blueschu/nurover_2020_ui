@@ -9,18 +9,7 @@ from python_qt_binding import QtCore
 
 from std_msgs import msg
 
-ACTUATOR_BUTTON_VALUES = [
-    0,
-    64,
-    128,
-    192,
-    255
-]
-
-ACTUATOR_BUTTON_BASE = 'actuator_button'
-
-ACTUATOR_TOPIC = "/life_detection/actuator_position"
-
+from . import settings, collection_sites
 
 
 class MyPlugin(Plugin):
@@ -31,22 +20,10 @@ class MyPlugin(Plugin):
         # Give QObjects reasonable names
         self.setObjectName('MyPlugin')
 
-        # Process standalone plugin command-line arguments
-        from argparse import ArgumentParser
-        parser = ArgumentParser()
-        # Add argument(s) to the parser.
-        parser.add_argument("-q", "--quiet", action="store_true",
-                            dest="quiet",
-                            help="Put plugin in silent mode")
-        args, unknowns = parser.parse_known_args(context.argv())
-        if not args.quiet:
-            print 'arguments: ', args
-            print 'unknowns: ', unknowns
-
         # Create QWidget
         self._widget = QWidget()
         # Get path to UI file which should be in the "resource" folder of this package
-        ui_file = os.path.join(rospkg.RosPack().get_path('rover_ui'), 'resource', 'ld_linearactuator.ui')
+        ui_file = os.path.join(settings.RESOURCE_PATH, 'ld_linearactuator.ui')
         # Extend the widget with all attributes and children from UI file
         loadUi(ui_file, self._widget)
         # Give QObjects reasonable names
@@ -61,13 +38,33 @@ class MyPlugin(Plugin):
         # Add widget to the user interface
         context.add_widget(self._widget)
 
-        self.actuator_button_pub = rospy.Publisher(ACTUATOR_TOPIC, msg.UInt8)
+        self.actuator_button_pub = rospy.Publisher(
+            settings.ROS_TOPICS.actuator_position.topic,
+            settings.ROS_TOPICS.actuator_position.type,
+        )
+        self.collection_sites = [
+            collection_sites.CollectionSite(name_index, actuator_position)
+            for name_index, actuator_position in enumerate(settings.COLLECTION_SITE_POSITIONS, start=1)
+        ]
+        self.active_collection_site = self.collection_sites[0]
 
-        for i, attr in enumerate(generate_actuator_button_names()):
-            getattr(self._widget, attr).clicked[bool].connect(self.on_actuator_button_click(i))
 
-        self._widget.actuator_slider.setRange(0, len(ACTUATOR_BUTTON_VALUES) - 1)
-        self._widget.actuator_slider.valueChanged.connect(self.on_slider_change)
+        # for i, attr in enumerate(generate_actuator_button_names()):
+        #     getattr(self._widget, attr).clicked[bool].connect(self.on_actuator_button_click(i))
+
+        # self._widget.actuator_slider.setRange(0, len(ACTUATOR_BUTTON_VALUES) - 1)
+        # self._widget.actuator_slider.valueChanged.connect(self.on_slider_change)
+
+        self.register_signals()
+
+    def register_signals(self):
+
+        # Register signals for collection site buttons
+        for site in self.collection_sites:
+            getattr(self._widget, site.button_name).clicked[bool].connect(
+                self.on_collection_site_select(site)
+            )
+
 
     def shutdown_plugin(self):
         # TODO unregister all publishers here
@@ -83,25 +80,32 @@ class MyPlugin(Plugin):
         # v = instance_settings.value(k)
         pass
 
+    def on_collection_site_select(self, collection_site):
 
-    def on_actuator_button_click(self, button_index):
         def _on_click():
-            m = msg.UInt8(ACTUATOR_BUTTON_VALUES[button_index])
+            self.active_collection_site = collection_site
+            m = settings.ROS_TOPICS.actuator_position.type(collection_site.actuator_position)
             self.actuator_button_pub.publish(m)
-            self._widget.actuator_slider.setSliderPosition(len(ACTUATOR_BUTTON_VALUES) - button_index - 1)
+
+            self.refresh_collection_site_pixmaps()
+
+            # self._widget.actuator_slider.setSliderPosition(len(ACTUATOR_BUTTON_VALUES) - button_index - 1)
 
         return _on_click
 
-    def on_slider_change(self, position):
-        m = msg.UInt8(ACTUATOR_BUTTON_VALUES[position])
-        # self.actuator_button_pub.publish(m)
+    def refresh_collection_site_pixmaps(self):
+        for site in self.collection_sites:
+            active = (site == self.active_collection_site)
+            getattr(self._widget, site.label_name).setPixmap(site.pixmap(active))
 
+    # def on_slider_change(self, position):
+    #     m = msg.UInt8(ACTUATOR_BUTTON_VALUES[position])
+    #     # self.actuator_button_pub.publish(m)
 
     # def trigger_configuration(self):
     # Comment in to signal that the plugin has a way to configure
     # This will enable a setting button (gear icon) in each dock widget title bar
     # Usually used to open a modal configuration dialog
 
-
-def generate_actuator_button_names():
-    return [("%s_%i" % (ACTUATOR_BUTTON_BASE, i)) for i in range(1, len(ACTUATOR_BUTTON_VALUES) + 1)]
+# def generate_actuator_button_names():
+#     return [("%s_%i" % (ACTUATOR_BUTTON_BASE, i)) for i in range(1, len(ACTUATOR_BUTTON_VALUES) + 1)]
