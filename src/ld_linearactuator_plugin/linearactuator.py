@@ -38,16 +38,22 @@ class MyPlugin(Plugin):
         # Add widget to the user interface
         context.add_widget(self._widget)
 
+        # Create publisher instances for the the ROS topics this plugin writes to
         self.actuator_button_pub = rospy.Publisher(
             settings.ROS_TOPICS.actuator_position.topic,
             settings.ROS_TOPICS.actuator_position.type,
         )
+        self.undetermined_pub = rospy.Publisher(
+            settings.ROS_TOPICS.undetermined.topic,
+            settings.ROS_TOPICS.undetermined.type,
+        )
+
+        # Create the collection site objects used by this plugin
         self.collection_sites = [
             collection_sites.CollectionSite(name_index, actuator_position)
             for name_index, actuator_position in enumerate(settings.COLLECTION_SITE_POSITIONS, start=1)
         ]
         self.active_collection_site = self.collection_sites[0]
-
 
         # for i, attr in enumerate(generate_actuator_button_names()):
         #     getattr(self._widget, attr).clicked[bool].connect(self.on_actuator_button_click(i))
@@ -61,10 +67,11 @@ class MyPlugin(Plugin):
 
         # Register signals for collection site buttons
         for site in self.collection_sites:
-            getattr(self._widget, site.button_name).clicked[bool].connect(
+            self.get_widget_attr(site.button_name).clicked[bool].connect(
                 self.on_collection_site_select(site)
             )
 
+        self.get_widget_attr(settings.OBJECT_NAMES.routine_button['important']).clicked.connect(self.on_click_important)
 
     def shutdown_plugin(self):
         # TODO unregister all publishers here
@@ -81,6 +88,9 @@ class MyPlugin(Plugin):
         pass
 
     def on_collection_site_select(self, collection_site):
+        """
+        Construct the callback that should be called when the user select's the given collection site.
+        """
 
         def _on_click():
             self.active_collection_site = collection_site
@@ -89,14 +99,27 @@ class MyPlugin(Plugin):
 
             self.refresh_collection_site_pixmaps()
 
-            # self._widget.actuator_slider.setSliderPosition(len(ACTUATOR_BUTTON_VALUES) - button_index - 1)
-
         return _on_click
 
     def refresh_collection_site_pixmaps(self):
+        """
+        Reload all image labels for the collection sites.
+        """
         for site in self.collection_sites:
             active = (site == self.active_collection_site)
             getattr(self._widget, site.label_name).setPixmap(site.pixmap(active))
+
+    def on_click_important(self):
+        """
+        Callback called when the user clicks on the important button
+        """
+        import random
+        self.get_widget_attr(settings.OBJECT_NAMES.routine_button['important']).setText(
+            random.choice(settings.IMPORTANT_MESSAGES)
+        )
+
+    def get_widget_attr(self, attr):
+        return getattr(self._widget, attr)
 
     # def on_slider_change(self, position):
     #     m = msg.UInt8(ACTUATOR_BUTTON_VALUES[position])
@@ -107,5 +130,3 @@ class MyPlugin(Plugin):
     # This will enable a setting button (gear icon) in each dock widget title bar
     # Usually used to open a modal configuration dialog
 
-# def generate_actuator_button_names():
-#     return [("%s_%i" % (ACTUATOR_BUTTON_BASE, i)) for i in range(1, len(ACTUATOR_BUTTON_VALUES) + 1)]

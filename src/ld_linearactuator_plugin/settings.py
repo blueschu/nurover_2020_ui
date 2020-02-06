@@ -10,12 +10,20 @@ class _RosTopics(object):
 
     actuator_position = _Topic("/life_detection/actuator_position", msg.UInt8)
 
+    undetermined = _Topic("/undetermined_topic", msg.String)
+
 
 class _ObjectNames(object):
-
     collection_site_label = 'collection_site_label'
 
     collection_site_button = 'collection_site_button'
+
+    routine_button = {
+        'collect': 'routine_button_collect',
+        'purge': 'routine_button_purge',
+        'runtest': 'routine_button_runtest',
+        'important': 'routine_button_important',
+    }
 
 
 ROS_TOPICS = _RosTopics()
@@ -25,26 +33,25 @@ OBJECT_NAMES = _ObjectNames()
 PACKAGE_PATH = rospkg.RosPack().get_path('rover_ui')
 
 RESOURCE_PATH = os.path.join(PACKAGE_PATH, 'resource')
-#
-# # {
-# #     'actuator_position': {
-# #         'topic': ,
-# #         'type': ,
-# #     },
-# # }
-#
-# BASE_OBJECT_NAME_ACTUATOR_BUTTON = 'collection_site_button'
-#
-# OBJECT_NAME_FORMATS = object()
-# OBJECT_NAME_FORMATS.__dict__.update({
-#
-#     'test' : 1
-#
-# })
-#
-# OBJECT_COLLECTION_SITE_LABEL = "collection_site_label_{}"
 
-
+IMPORTANT_MESSAGES = [
+    "Launch Fireworks",
+    "Do Not Press",
+    "Fire Torpedos",
+    "Initiate Peace Talks",
+    "Start Martian Invasion",
+    "Release Milk",
+    "Dump Fuel",
+    "Lower Ailerons",
+    "Open Wormhole",
+    "Read ISO-3103",
+    "Panic!",
+    "Cycle passwords",
+    "Farm Potatos",
+    "Deploy Solar Array",
+    "Shields To Maximum",
+    "Replace Ink",
+]
 
 COLLECTION_SITE_POSITIONS = [
     0,
