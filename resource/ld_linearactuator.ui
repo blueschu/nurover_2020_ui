@@ -187,38 +187,38 @@
        <layout class="QVBoxLayout" name="verticalLayout_13">
         <item>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="2" column="1">
-           <widget class="QSpinBox" name="spinBox_3"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCommandLinkButton" name="commandLinkButton_2">
-            <property name="text">
-             <string>Test Selected Site</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
-           <widget class="QCommandLinkButton" name="commandLinkButton">
-            <property name="text">
-             <string>Purge Vacuum Hose</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="spinBox"/>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="spinBox_2"/>
-          </item>
-          <item row="2" column="0">
-           <widget class="QCommandLinkButton" name="commandLinkButton_4">
+           <widget class="QCommandLinkButton" name="routine_button_collect">
             <property name="text">
              <string>Collect Sample</string>
             </property>
            </widget>
           </item>
+          <item row="2" column="0">
+           <widget class="QCommandLinkButton" name="routine_button_runtest">
+            <property name="text">
+             <string>Test Selected Site</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCommandLinkButton" name="routine_button_purge">
+            <property name="text">
+             <string>Purge Vacuum Hose</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="spinBox"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="spinBox_2"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="spinBox_3"/>
+          </item>
           <item row="3" column="0">
-           <widget class="QCommandLinkButton" name="commandLinkButton_3">
+           <widget class="QCommandLinkButton" name="routine_button_important">
             <property name="text">
              <string>Launch Fireworks</string>
             </property>
