@@ -13,13 +13,13 @@ _PIXEL_MAP_EMPTY = 'empty.png'
 
 _PIXEL_MAP_FILLED = 'filled.png'
 
-_PIXEL_MAP_USED = 'empty.png'
+_PIXEL_MAP_USED = 'used.png'
 
 _PIXEL_MAP_EMPTY_ACTIVE = 'empty_active.png'
 
 _PIXEL_MAP_FILLED_ACTIVE = 'filled_active.png'
 
-_PIXEL_MAP_USED_ACTIVE = 'empty_active.png'
+_PIXEL_MAP_USED_ACTIVE = 'used_active.png'
 
 
 @unique
