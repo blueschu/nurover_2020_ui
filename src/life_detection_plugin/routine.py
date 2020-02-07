@@ -125,17 +125,24 @@ class Routine(object):
         self._active_bar_index += 1
         self._timer_counter = 0
 
+        # Run the finish callback for the previous step
+        finish = self._steps[self._active_bar_index - 1].finish_callback
+        if finish:
+            finish()
+
+        # Check if there is a next step
         if self._active_bar_index == len(self._progress_bars):
+            # No next step. Stop the timer and reset the routine.
             self._timer.stop()
             self._reset()
         else:
+            # There is a next step. Set the previous progress bar to "done" and run the
+            # start callback for the next step, if one was provided.
             self._progress_bars[self._active_bar_index - 1].setFormat(
                 "{} (done)".format(self._steps[self._active_bar_index -1].description)
             )
-            finish = self._steps[self._active_bar_index - 1].finish_callback
+
             start = self._steps[self._active_bar_index].start_callback
-            if finish:
-                finish()
             if start:
                 start()
 
