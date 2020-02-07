@@ -4,12 +4,12 @@ import rospkg
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget
+from python_qt_binding.QtWidgets import QWidget, QMessageBox, QApplication
 from python_qt_binding import QtCore
 
 from std_msgs import msg
 
-from . import settings, collection_sites
+from . import settings, collection_sites, routine
 
 
 class MyPlugin(Plugin):
@@ -55,6 +55,7 @@ class MyPlugin(Plugin):
         ]
         self.active_collection_site = self.collection_sites[0]
         self.dirt_in_vacuum_chamber = False
+        self._routine_running = False
 
         # for i, attr in enumerate(generate_actuator_button_names()):
         #     getattr(self._widget, attr).clicked[bool].connect(self.on_actuator_button_click(i))
@@ -77,6 +78,10 @@ class MyPlugin(Plugin):
 
         self.get_widget_attr(settings.OBJECT_NAMES.reset_collection_states_button).clicked.connect(
             self.on_click_reset_collection_states
+        )
+
+        self.get_widget_attr(settings.OBJECT_NAMES.routine_button['collect']).clicked.connect(
+            self.on_run_routine_collect
         )
 
         # Signals for all of the manual control toggles
@@ -190,6 +195,33 @@ class MyPlugin(Plugin):
             button.setText("Not Running")
             self.undetermined_pub.publish("Stopping pump")
 
+    def on_run_routine_collect(self):
+        """
+        Signal handler for when the used pressed the "Collect Sample" routine button.
+        """
+        if self.dirt_in_vacuum_chamber:
+            confirmed = self.prompt_confirmation(
+                "There is already dirt in the vacuum chamber.\n"
+                "Are you sure you want to start the sample collection procedure?"
+            )
+            if not confirmed:
+                return
+
+        if not self.active_collection_site.is_empty:
+            confirmed = self.prompt_confirmation(
+                "The currently selected collection site is not empty.\n"
+                "Are your sure you want to start the sample collection procedure?"
+            )
+            if not confirmed:
+                return
+
+        r = routine.Routine(self._widget, settings.OBJECT_NAMES.progress_bar_layout)
+        r.add_step_click_control(3000, "Closing valve...", 'valve', clicked=False)
+        r.add_step_click_control(10000, "Running Vacuum...", 'vacuum', clicked=True)
+        r.add_step_click_control(3000, "Powering down vacuum...", 'vacuum', clicked=False)
+        r.add_step_click_control(3000, "Opening valve...", 'valve', clicked=True)
+
+        self.run_routine(r)
 
     def check_control_on(self, button_name):
         """
@@ -204,11 +236,29 @@ class MyPlugin(Plugin):
         # TODO
         pass
 
-    # def on_slider_change(self, position):
-    #     m = msg.UInt8(ACTUATOR_BUTTON_VALUES[position])
-    #     # self.actuator_button_pub.publish(m)
+    def prompt_confirmation(self, message, title="Confirmation Required"):
+        """Create a Yes/No confirmation message. Return True is the user selected 'Yes'. """
+        reply = QMessageBox.question(self._widget, title, message, QMessageBox.Yes, QMessageBox.Cancel)
+        return reply == QMessageBox.Yes
 
-    # def trigger_configuration(self):
-    # Comment in to signal that the plugin has a way to configure
-    # This will enable a setting button (gear icon) in each dock widget title bar
-    # Usually used to open a modal configuration dialog
+    def run_routine(self, active_routine):
+        if self._routine_running:
+            QMessageBox.critical(
+                self._widget,
+                "Routine Start Error",
+                "Cannot start new routine - a routine is already running!",
+                QMessageBox.Ok
+            )
+            return
+
+        self._routine_running = True
+
+        def notify_routine_end():
+            self._routine_running = False
+
+        active_routine.run(notify_routine_end)
+
+        # Do to an issue with threading and the Qt event loop with ROS, the timer will not run its timeout
+        # callable UNLESS control is explicitly returned to the applicaion to process events.
+        while self._routine_running:
+            QApplication.processEvents(QtCore.QEventLoop.AllEvents)

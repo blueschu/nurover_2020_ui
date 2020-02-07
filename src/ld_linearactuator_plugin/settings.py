@@ -37,7 +37,9 @@ class _ObjectNames(object):
         'pump': 'control_button_pump',
     }
 
+    progress_bar_layout = 'progress_bars'
 
+ROUTINE_TIMER_TICK = 5
 
 ROS_TOPICS = _RosTopics()
 
