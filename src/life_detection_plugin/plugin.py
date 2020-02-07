@@ -11,17 +11,17 @@ from std_msgs import msg
 from . import settings, collection_sites, routine
 
 
-class MyPlugin(Plugin):
+class LifeDetectionPlugin(Plugin):
 
     def __init__(self, context):
-        super(MyPlugin, self).__init__(context)
+        super(LifeDetectionPlugin, self).__init__(context)
         # Give QObjects reasonable names
-        self.setObjectName('MyPlugin')
+        self.setObjectName('LifeDetectionPlugin')
 
         # Create QWidget
         self._widget = QWidget()
         # Get path to UI file which should be in the "resource" folder of this package
-        ui_file = os.path.join(settings.RESOURCE_PATH, 'ld_linearactuator.ui')
+        ui_file = os.path.join(settings.RESOURCE_PATH, 'life_detection.ui')
         # Extend the widget with all attributes and children from UI file
         loadUi(ui_file, self._widget)
         # Give QObjects reasonable names

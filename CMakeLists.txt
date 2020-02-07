@@ -164,7 +164,7 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
-install(PROGRAMS scripts/ld_linearactuator_plugin
+install(PROGRAMS scripts/life_detection_plugin
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         )
 

@@ -1,7 +1,7 @@
 <library path="src">
-    <class name="Linear Actuator Plugin" type="ld_linearactuator_plugin.linearactuator.MyPlugin" base_class_type="rqt_gui_py::Plugin">
+    <class name="Linear Actuator Plugin" type="life_detection_plugin.plugin.LifeDetectionPlugin" base_class_type="rqt_gui_py::Plugin">
         <description>
-            Description to be written
+            RQT Plugin the the Watney Mk. 2 Life Detection System. Implemented for the University Rover Challenge 2020.
         </description>
         <qtgui>
             <!-- optional grouping...
@@ -12,7 +12,7 @@
               <label>Subgroup</label>
             </group>
             -->
-            <label>Linear Actuator Plugin</label>
+            <label>Life Detection Plugin</label>
             <icon type="theme">system-help</icon>
             <statustip>Something about user interfaces.</statustip>
         </qtgui>

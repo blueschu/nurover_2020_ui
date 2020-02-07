@@ -2,9 +2,9 @@
 
 import sys
 
-from ld_linearactuator_plugin.linearactuator import MyPlugin
+from life_detection_plugin.plugin import LifeDetectionPlugin
 from rqt_gui.main import Main
 
-plugin = 'ld_linearactuator_plugin'
+plugin = 'life_detection_plugin'
 main = Main(filename=plugin)
 sys.exit(main.main(standalone=plugin))
