@@ -1,6 +1,5 @@
 import os
 import rospy
-import rospkg
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
@@ -13,7 +12,6 @@ from . import settings, collection_sites, routine
 
 
 class MyPlugin(Plugin):
-    reset_button_signal = QtCore.pyqtSignal(bool)
 
     def __init__(self, context):
         super(MyPlugin, self).__init__(context)
@@ -27,12 +25,11 @@ class MyPlugin(Plugin):
         # Extend the widget with all attributes and children from UI file
         loadUi(ui_file, self._widget)
         # Give QObjects reasonable names
-        self._widget.setObjectName('GUI Experiment Object Name')
-        # Show _widget.windowTitle on left-top of each plugin (when
-        # it's set in _widget). This is useful when you open multiple
-        # plugins at once. Also if you open multiple instances of your
-        # plugin at once, these lines add number to make it easy to
-        # tell from pane to pane.
+        self._widget.setObjectName('Watney Mk. 2 Life Detection')
+
+        # From RQT Tutorial: Show _widget.windowTitle on left-top of each plugin. This is useful
+        # when you open multiple plugins at once. Also if you open multiple instances of your plugin at once,
+        # these lines add number to make it easy to tell from pane to pane.
         if context.serial_number() > 1:
             self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
         # Add widget to the user interface
@@ -57,20 +54,25 @@ class MyPlugin(Plugin):
         self.dirt_in_vacuum_chamber = False
         self._routine_running = False
 
-        # for i, attr in enumerate(generate_actuator_button_names()):
-        #     getattr(self._widget, attr).clicked[bool].connect(self.on_actuator_button_click(i))
-
-        # self._widget.actuator_slider.setRange(0, len(ACTUATOR_BUTTON_VALUES) - 1)
-        # self._widget.actuator_slider.valueChanged.connect(self.on_slider_change)
-
         self.register_signals()
 
+    def get_widget_attr(self, attr):
+        """
+        Return the given attributed of this plugin's widget
+
+        Implemented to improve code readability.
+        """
+        return getattr(self._widget, attr)
+
     def register_signals(self):
+        """
+        Register the Qt signals required by this plugin
+        """
 
         # Register signals for collection site buttons
         for site in self.collection_sites:
             self.get_widget_attr(site.button_name).clicked[bool].connect(
-                self.on_collection_site_select(site)
+                self.make_collection_site_select_callback(site)
             )
 
         # Register signals for the "important routine" button
@@ -96,8 +98,11 @@ class MyPlugin(Plugin):
         )
 
     def shutdown_plugin(self):
-        # TODO unregister all publishers here
-        pass
+        """
+        Un-register all ROS publishers.
+        """
+        self.actuator_button_pub.unregister()
+        self.undetermined_pub.unregister()
 
     def save_settings(self, plugin_settings, instance_settings):
         # TODO save intrinsic configuration, usually using:
@@ -109,7 +114,7 @@ class MyPlugin(Plugin):
         # v = instance_settings.value(k)
         pass
 
-    def on_collection_site_select(self, collection_site):
+    def make_collection_site_select_callback(self, collection_site):
         """
         Construct the callback that should be called when the user select's the given collection site.
         """
@@ -229,12 +234,6 @@ class MyPlugin(Plugin):
         """
         return self.get_widget_attr(settings.OBJECT_NAMES.control_button[button_name]).isChecked()
 
-    def get_widget_attr(self, attr):
-        return getattr(self._widget, attr)
-
-    def splash_status_message(self, message):
-        # TODO
-        pass
 
     def prompt_confirmation(self, message, title="Confirmation Required"):
         """Create a Yes/No confirmation message. Return True is the user selected 'Yes'. """
@@ -242,6 +241,9 @@ class MyPlugin(Plugin):
         return reply == QMessageBox.Yes
 
     def run_routine(self, active_routine):
+        """
+        Run the given life detection routine.
+        """
         if self._routine_running:
             QMessageBox.critical(
                 self._widget,
@@ -258,7 +260,7 @@ class MyPlugin(Plugin):
 
         active_routine.run(notify_routine_end)
 
-        # Do to an issue with threading and the Qt event loop with ROS, the timer will not run its timeout
+        # Due to an issue with threading and the Qt event loop with ROS, the timer will not run its timeout
         # callable UNLESS control is explicitly returned to the applicaion to process events.
         while self._routine_running:
             QApplication.processEvents(QtCore.QEventLoop.AllEvents)
