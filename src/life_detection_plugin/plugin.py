@@ -86,6 +86,10 @@ class LifeDetectionPlugin(Plugin):
             self.on_run_routine_collect
         )
 
+        self.get_widget_attr(settings.OBJECT_NAMES.routine_button['purge']).clicked.connect(
+            self.on_run_routine_purge
+        )
+
         # Signals for all of the manual control toggles
         for button_key, object_name in settings.OBJECT_NAMES.control_button.items():
             self.get_widget_attr(object_name).toggled.connect(
@@ -225,6 +229,21 @@ class LifeDetectionPlugin(Plugin):
         r.add_step_click_control(10000, "Running Vacuum...", 'vacuum', clicked=True)
         r.add_step_click_control(3000, "Powering down vacuum...", 'vacuum', clicked=False)
         r.add_step_click_control(3000, "Opening valve...", 'valve', clicked=True)
+
+        self.run_routine(r)
+
+    def on_run_routine_purge(self):
+        """
+        Signal handler for when the used pressed the "Purge" routine button.
+        """
+        r = routine.Routine(self._widget, settings.OBJECT_NAMES.progress_bar_layout)
+        r.add_step_click_control(3000, "Opening valve...", 'valve', clicked=True)
+        # Durations of less tha the timer tick will result in a "busy indicator" instead of the usual progress bar.
+        # Because of this, we need to use the routine timer tick to indicate an instantaneous step.
+        r.add_step_click_control(settings.ROUTINE_TIMER_TICK, "Starting vacuum", 'valve', clicked=True)
+        r.add_step_click_control(10000, "Running vibration motors", 'valve', clicked=True)
+        r.add_step_click_control(settings.ROUTINE_TIMER_TICK, "Stopping vibration motors", 'valve', clicked=False)
+        r.add_step_click_control(3000, "Powering down vacuum...", 'vacuum', clicked=False)
 
         self.run_routine(r)
 
