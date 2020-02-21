@@ -57,7 +57,6 @@ class LifeDetectionPlugin(Plugin):
         self.register_signals()
         self.set_startup_icons()
 
-
     def get_widget_attr(self, attr):
         """
         Return the given attributed of this plugin's widget
@@ -116,7 +115,6 @@ class LifeDetectionPlugin(Plugin):
         # Set "Off" icon for all of the manual control
         for _, object_name in settings.OBJECT_NAMES.control_button.items():
             self.set_icon(object_name, QStyle.SP_DialogNoButton)
-
 
     def shutdown_plugin(self):
         """
@@ -244,9 +242,10 @@ class LifeDetectionPlugin(Plugin):
             if not confirmed:
                 return
 
+        vacuum_duration = 1000 * self.get_widget_attr(settings.OBJECT_NAMES.routine_button['collect'] + '_spin').value()
         r = routine.Routine(self._widget, settings.OBJECT_NAMES.progress_bar_layout)
         r.add_step_click_control(3000, "Closing valve...", 'valve', clicked=False)
-        r.add_step_click_control(10000, "Running Vacuum...", 'vacuum', clicked=True)
+        r.add_step_click_control(vacuum_duration, "Running Vacuum...", 'vacuum', clicked=True)
         r.add_step_click_control(3000, "Powering down vacuum...", 'vacuum', clicked=False)
         r.add_step_click_control(3000, "Opening valve...", 'valve', clicked=True)
 
@@ -256,12 +255,14 @@ class LifeDetectionPlugin(Plugin):
         """
         Signal handler for when the user presses the "Purge" routine button.
         """
+
+        purge_duration = 1000 * self.get_widget_attr(settings.OBJECT_NAMES.routine_button['purge'] + '_spin').value()
         r = routine.Routine(self._widget, settings.OBJECT_NAMES.progress_bar_layout)
         r.add_step_click_control(3000, "Opening valve...", 'valve', clicked=True)
         # Durations of less tha the timer tick will result in a "busy indicator" instead of the usual progress bar.
         # Because of this, we need to use the routine timer tick to indicate an instantaneous step.
         r.add_step_click_control(settings.ROUTINE_TIMER_TICK, "Starting vacuum", 'vacuum', clicked=True)
-        r.add_step_click_control(10000, "Running vibration motors", 'vibration', clicked=True)
+        r.add_step_click_control(purge_duration, "Running vibration motors", 'vibration', clicked=True)
         r.add_step_click_control(settings.ROUTINE_TIMER_TICK, "Stopping vibration motors", 'vibration', clicked=False)
         r.add_step_click_control(3000, "Powering down vacuum...", 'vacuum', clicked=False)
 
@@ -278,8 +279,10 @@ class LifeDetectionPlugin(Plugin):
             )
             if not confirmed:
                 return
+
+        test_duration = 1000 * self.get_widget_attr(settings.OBJECT_NAMES.routine_button['runtest'] + '_spin').value()
         r = routine.Routine(self._widget, settings.OBJECT_NAMES.progress_bar_layout)
-        r.add_step_toggle_control(10000, "Pumping water into collection site...", 'pump', start_clicked=True)
+        r.add_step_toggle_control(test_duration, "Pumping water into collection site...", 'pump', start_clicked=True)
 
         self.run_routine(r)
 
