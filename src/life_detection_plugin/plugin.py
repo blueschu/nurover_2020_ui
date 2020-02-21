@@ -3,7 +3,7 @@ import rospy
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QMessageBox, QApplication, QStyle
+from python_qt_binding.QtWidgets import QWidget, QMessageBox, QApplication, QStyle, QCommonStyle
 from python_qt_binding import QtCore, QtGui
 
 from . import settings, collection_sites, routine
@@ -55,19 +55,8 @@ class LifeDetectionPlugin(Plugin):
         self._routine_running = False
 
         self.register_signals()
+        self.set_startup_icons()
 
-        # Set button icons
-        def _set_icon(widget, icon):
-            w = self.get_widget_attr(widget)
-            w.setIcon(w.style().standardIcon(icon))
-
-        _set_icon(settings.OBJECT_NAMES.button_vacuum_up, QStyle.SP_ArrowUp)
-        _set_icon(settings.OBJECT_NAMES.button_vacuum_down, QStyle.SP_ArrowDown)
-        _set_icon(settings.OBJECT_NAMES.reset_collection_states_button, QStyle.SP_TrashIcon)
-
-        self.get_widget_attr(settings.OBJECT_NAMES.sync_label).setPixmap(
-            QtGui.QPixmap(self.get_widget_attr(settings.OBJECT_NAMES.button_vacuum_up).style().standardIcon(QStyle.SP_DialogApplyButton).pixmap(QtCore.QSize(15, 15)))
-        )
 
     def get_widget_attr(self, attr):
         """
@@ -108,6 +97,26 @@ class LifeDetectionPlugin(Plugin):
         self.get_widget_attr(settings.OBJECT_NAMES.control_button['vacuum']).toggled.connect(
             self.on_toggle_control_vacuum
         )
+
+    def set_startup_icons(self):
+        # Set button icons
+        def _set_icon(widget, icon):
+            w = self.get_widget_attr(widget)
+            w.setIcon(w.style().standardIcon(icon))
+
+        self.set_icon(settings.OBJECT_NAMES.button_vacuum_up, QStyle.SP_ArrowUp)
+        self.set_icon(settings.OBJECT_NAMES.button_vacuum_down, QStyle.SP_ArrowDown)
+        self.set_icon(settings.OBJECT_NAMES.reset_collection_states_button, QStyle.SP_TrashIcon)
+
+        style = QCommonStyle()
+        self.get_widget_attr(settings.OBJECT_NAMES.sync_label).setPixmap(
+            QtGui.QPixmap(style.standardIcon(QStyle.SP_DialogApplyButton).pixmap(QtCore.QSize(15, 15)))
+        )
+
+        # Set "Off" icon for all of the manual control
+        for _, object_name in settings.OBJECT_NAMES.control_button.items():
+            self.set_icon(object_name, QStyle.SP_DialogNoButton)
+
 
     def shutdown_plugin(self):
         """
@@ -157,6 +166,7 @@ class LifeDetectionPlugin(Plugin):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['vacuum'])
         if checked:
             button.setText("Running")
+            self.set_icon(button, QStyle.SP_DialogYesButton)
             self.undetermined_pub.publish("Running vacuum")
 
             # If the valve is currently close, register that there is now dirt in the vacuum chamber
@@ -164,12 +174,14 @@ class LifeDetectionPlugin(Plugin):
                 self.dirt_in_vacuum_chamber = True
         else:
             button.setText("Not Running")
+            self.set_icon(button, QStyle.SP_DialogNoButton)
             self.undetermined_pub.publish("Stopping vacuum")
 
     def on_toggle_control_valve(self, checked):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['valve'])
         if checked:
             button.setText("Open")
+            self.set_icon(button, QStyle.SP_DialogYesButton)
             self.undetermined_pub.publish("Opening Valve")
 
             # If there is dirt currently in the vacuum, register that is is now in the active collection site
@@ -179,21 +191,25 @@ class LifeDetectionPlugin(Plugin):
                 self.dirt_in_vacuum_chamber = False
         else:
             button.setText("Closed")
+            self.set_icon(button, QStyle.SP_DialogNoButton)
             self.undetermined_pub.publish("Closing Valve")
 
     def on_toggle_control_vibration(self, checked):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['vibration'])
         if checked:
             button.setText("Running")
+            self.set_icon(button, QStyle.SP_DialogYesButton)
             self.undetermined_pub.publish("Running vibration motors")
         else:
             button.setText("Not Running")
+            self.set_icon(button, QStyle.SP_DialogNoButton)
             self.undetermined_pub.publish("Stopping vibration motors")
 
     def on_toggle_control_pump(self, checked):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['pump'])
         if checked:
             button.setText("Running")
+            self.set_icon(button, QStyle.SP_DialogYesButton)
             self.undetermined_pub.publish("Running pump")
 
             if self.active_collection_site.is_filled:
@@ -201,6 +217,7 @@ class LifeDetectionPlugin(Plugin):
                 self.refresh_collection_site_pixmaps()
         else:
             button.setText("Not Running")
+            self.set_icon(button, QStyle.SP_DialogNoButton)
             self.undetermined_pub.publish("Stopping pump")
 
     def on_run_routine_collect(self):
@@ -306,3 +323,8 @@ class LifeDetectionPlugin(Plugin):
         # callable UNLESS control is explicitly returned to the applicaion to process events.
         while self._routine_running:
             QApplication.processEvents(QtCore.QEventLoop.AllEvents)
+
+    def set_icon(self, widget, icon):
+        if not isinstance(widget, QWidget):
+            widget = self.get_widget_attr(widget)
+        widget.setIcon(widget.style().standardIcon(icon))
