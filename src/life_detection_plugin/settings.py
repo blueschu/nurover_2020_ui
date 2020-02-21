@@ -39,6 +39,12 @@ class _ObjectNames(object):
 
     progress_bar_layout = 'progress_bars'
 
+    button_vacuum_up = 'button_vacuum_up'
+
+    button_vacuum_down = 'button_vacuum_down'
+
+    sync_label = 'sync_label'
+
 ROUTINE_TIMER_TICK = 5
 
 ROS_TOPICS = _RosTopics()

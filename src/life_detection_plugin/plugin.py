@@ -3,10 +3,8 @@ import rospy
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtWidgets import QWidget, QMessageBox, QApplication
-from python_qt_binding import QtCore
-
-from std_msgs import msg
+from python_qt_binding.QtWidgets import QWidget, QMessageBox, QApplication, QStyle
+from python_qt_binding import QtCore, QtGui
 
 from . import settings, collection_sites, routine
 
@@ -57,6 +55,19 @@ class LifeDetectionPlugin(Plugin):
         self._routine_running = False
 
         self.register_signals()
+
+        # Set button icons
+        def _set_icon(widget, icon):
+            w = self.get_widget_attr(widget)
+            w.setIcon(w.style().standardIcon(icon))
+
+        _set_icon(settings.OBJECT_NAMES.button_vacuum_up, QStyle.SP_ArrowUp)
+        _set_icon(settings.OBJECT_NAMES.button_vacuum_down, QStyle.SP_ArrowDown)
+        _set_icon(settings.OBJECT_NAMES.reset_collection_states_button, QStyle.SP_TrashIcon)
+
+        self.get_widget_attr(settings.OBJECT_NAMES.sync_label).setPixmap(
+            QtGui.QPixmap(self.get_widget_attr(settings.OBJECT_NAMES.button_vacuum_up).style().standardIcon(QStyle.SP_DialogApplyButton).pixmap(QtCore.QSize(15, 15)))
+        )
 
     def get_widget_attr(self, attr):
         """
@@ -251,7 +262,6 @@ class LifeDetectionPlugin(Plugin):
 
         self.run_routine(r)
 
-
     def on_run_routine_important(self):
         """
         Callback called when the user clicks on the important button
@@ -261,13 +271,11 @@ class LifeDetectionPlugin(Plugin):
             random.choice(settings.IMPORTANT_MESSAGES)
         )
 
-
     def check_control_on(self, button_name):
         """
         Check whether the control button with the given button name is currently checked
         """
         return self.get_widget_attr(settings.OBJECT_NAMES.control_button[button_name]).isChecked()
-
 
     def prompt_confirmation(self, message, title="Confirmation Required"):
         """Create a Yes/No confirmation message. Return True is the user selected 'Yes'. """

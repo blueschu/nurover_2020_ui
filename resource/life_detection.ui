@@ -318,17 +318,102 @@
           </item>
          </layout>
         </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="QPushButton" name="button_reset_collection_states">
-          <property name="text">
-           <string>Reset Collection States</string>
-          </property>
-         </widget>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>11</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Raise/Lower Vacuum</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="button_vacuum_up">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset theme="/button_action/add"/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="button_vacuum_down">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="button_reset_collection_states">
+            <property name="text">
+             <string>Reset Collection States</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QWidget" name="widget" native="true">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>30</height>
+      </size>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>120</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Synced with Rover</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="sync_label">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>
