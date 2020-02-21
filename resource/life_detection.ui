@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>580</height>
+    <width>875</width>
+    <height>622</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,11 +29,23 @@
          <layout class="QVBoxLayout" name="verticalLayout_11">
           <item alignment="Qt::AlignHCenter|Qt::AlignTop">
            <widget class="QLabel" name="collection_site_label_1">
+            <property name="minimumSize">
+             <size>
+              <width>96</width>
+              <height>120</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Box</enum>
+            </property>
             <property name="text">
              <string/>
             </property>
             <property name="pixmap">
              <pixmap>empty.png</pixmap>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -55,11 +67,23 @@
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item alignment="Qt::AlignHCenter|Qt::AlignTop">
            <widget class="QLabel" name="collection_site_label_2">
+            <property name="minimumSize">
+             <size>
+              <width>96</width>
+              <height>120</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Panel</enum>
+            </property>
             <property name="text">
              <string/>
             </property>
             <property name="pixmap">
              <pixmap>empty.png</pixmap>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -81,11 +105,23 @@
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item alignment="Qt::AlignHCenter|Qt::AlignTop">
            <widget class="QLabel" name="collection_site_label_3">
+            <property name="minimumSize">
+             <size>
+              <width>96</width>
+              <height>120</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Panel</enum>
+            </property>
             <property name="text">
              <string/>
             </property>
             <property name="pixmap">
              <pixmap>empty.png</pixmap>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -110,11 +146,35 @@
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item alignment="Qt::AlignHCenter|Qt::AlignTop">
            <widget class="QLabel" name="collection_site_label_4">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>96</width>
+              <height>120</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>256</width>
+              <height>320</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Panel</enum>
+            </property>
             <property name="text">
              <string/>
             </property>
             <property name="pixmap">
              <pixmap>empty.png</pixmap>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -151,17 +211,29 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>96</width>
+              <height>120</height>
+             </size>
+            </property>
             <property name="sizeIncrement">
              <size>
               <width>0</width>
               <height>0</height>
              </size>
             </property>
+            <property name="frameShape">
+             <enum>QFrame::Panel</enum>
+            </property>
             <property name="text">
              <string/>
             </property>
             <property name="pixmap">
              <pixmap>empty.png</pixmap>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
