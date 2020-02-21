@@ -145,6 +145,10 @@ class LifeDetectionPlugin(Plugin):
             m = settings.ROS_TOPICS.actuator_position.type(collection_site.actuator_position)
             self.actuator_button_pub.publish(m)
 
+            r = routine.Routine(self._widget, settings.OBJECT_NAMES.progress_bar_layout)
+            r.add_step(2000, 'Moving linear actuator...', None, None)
+            self.run_routine(r)
+
             self.refresh_collection_site_pixmaps()
 
         return _on_click
