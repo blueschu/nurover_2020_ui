@@ -1,5 +1,5 @@
 <library path="src">
-    <class name="Linear Actuator Plugin" type="life_detection_plugin.plugin.LifeDetectionPlugin" base_class_type="rqt_gui_py::Plugin">
+    <class name="Life Detection Plugin" type="life_detection_plugin.plugin.LifeDetectionPlugin" base_class_type="rqt_gui_py::Plugin">
         <description>
             RQT Plugin the the Watney Mk. 2 Life Detection System. Implemented for the University Rover Challenge 2020.
         </description>
