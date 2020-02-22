@@ -1,7 +1,7 @@
 <library path="src">
-    <class name="Life Detection Plugin" type="life_detection_plugin.plugin.LifeDetectionPlugin" base_class_type="rqt_gui_py::Plugin">
+    <class name="Current Sensor Plot" type="current_sensor_plugin.plugin.CurrentSensorPlugin" base_class_type="rqt_gui_py::Plugin">
         <description>
-            RQT Plugin for the Watney Mk. 2 Life Detection System. Implemented for the University Rover Challenge 2020.
+            RQT Plugin for plotting live current sensor data. Implemented for the University Rover Challenge 2020.
         </description>
         <qtgui>
             <!-- optional grouping...
@@ -12,7 +12,7 @@
               <label>Subgroup</label>
             </group>
             -->
-            <label>Life Detection Plugin</label>
+            <label>Current Sensor Plugin</label>
             <icon type="theme">system-help</icon>
             <statustip>Something about user interfaces.</statustip>
         </qtgui>
