@@ -10,20 +10,22 @@ class CurrentDisplay(object):
     Container class for all of the widgets associated with a given motor's current data.
     """
 
-    def __init__(self, plot_data_line, progress_bar_widget, max_measurements=20):
+    def __init__(self, plot_data_line, progress_bar_widget, max_measurements=35):
         self._plot_data_line = plot_data_line
         self._progress_bar_widget = progress_bar_widget
         self._max_measurements = max_measurements
         self._data_time = []
         self._data_current = []
+        self._data_finger = 0
 
     def update_outputs(self, time_secs, current_measurement):
-        self._data_time.append(time_secs)
-        self._data_current.append(current_measurement)
-
-        for data_list in (self._data_time, self._data_current):
-            if len(data_list) > self._max_measurements:
-                data_list.pop(0)
+        if len(self._data_time) == self._max_measurements:
+            self._data_time[self._data_finger] = time_secs
+            self._data_current[self._data_finger] = current_measurement
+            self._data_finger = (self._data_finger + 1) % self._max_measurements
+        else:
+            self._data_time.append(time_secs)
+            self._data_current.append(current_measurement)
 
         self._plot_data_line.setData(self._data_time, self._data_current)
         self.set_bar_value(current_measurement)
