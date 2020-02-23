@@ -6,4 +6,7 @@ d = generate_distutils_setup(
     package_dir={'': 'src'},
 )
 
+# Unfortunately ignored by ROS, but kept here a documentation
+d['requires'] = ['pyqtgraph']
+
 setup(**d)
