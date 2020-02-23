@@ -4,14 +4,17 @@ Current sensor plotting plugin for Watney Mk. 2.
 For a brief pyqtgraph tutorial, see https://www.learnpyqt.com/courses/graphics-plotting/plotting-pyqtgraph/
 For a tutorial on adding pyqtgraph widgets with QtCreator, see https://www.learnpyqt.com/courses/qt-creator/embed-pyqtgraph-custom-widgets-qt-app/
 For a tutorial on creating slots/signals, see https://www.pythoncentral.io/pysidepyqt-tutorial-creating-your-own-signals-and-slots/.
+For QtCore.Qt constants: https://doc.qt.io/qtforpython/PySide2/QtCore/Qt.html
+
 """
 
 import os
+import random
 import rospy
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi, QtCore
-from python_qt_binding.QtWidgets import QWidget, QLayout, QProgressBar
+from python_qt_binding.QtWidgets import QWidget, QVBoxLayout, QProgressBar, QLabel, QFrame
 
 try:
     import pyqtgraph
@@ -103,16 +106,18 @@ class CurrentSensorPlugin(Plugin):
         # Add Title
         # widget.setTitle("Motor Currents", color='blue', size=30)
         # Add Axis Labels
-        widget.setLabel('left', 'Current (Amps)', color='blue', size=30)
-        widget.setLabel('bottom', 'Time (s)', color='blue', size=30)
+        widget.setLabel('left', 'Current (Amps)', size=30)
+        widget.setLabel('bottom', 'Time (s)', size=30)
         # Add legend
         widget.addLegend()
         # Add grid
         widget.showGrid(x=True, y=True)
         # Set Range
-        widget.setYRange(0, 8, padding=0)
+        widget.setYRange(0, 10, padding=0)
+        for threshold, (r,g,b) in settings.CURRENT_BAR_COLOR_THRESHOLDS:
+            widget.addLine(y=threshold/1000, pen=pyqtgraph.mkPen(r,g,b, style=QtCore.Qt.DotLine, width=1.6))
 
-    def add_current_sensor_display(self):
+    def grow_current_sensor_display(self):
         """
         Adds an extra current sensor output to this plugin.
 
@@ -123,14 +128,31 @@ class CurrentSensorPlugin(Plugin):
 
         # Create pyqtgraph plot dataline for the new current sensor
         plot_widget = self.get_widget_attr(settings.OBJECT_NAMES.current_plot)
-        data_line = plot_widget.plot([], [], name='Sensor %i' % current_sensor_index, symbol='+')
+        plot_widget.setTitle('Live Current Sensor Telemetry')
+        # Select random color for the new pen. TODO Created predetermined list of distinctive pen colors.
+        pen = pyqtgraph.mkPen(tuple(random.randint(0, 255) for _ in range(3)), style=QtCore.Qt.SolidLine, width=2)
+        data_line = plot_widget.plot([], [], name='Sensor %i' % current_sensor_index, pen=pen, symbol='+')
 
         # Create a progress bar for the new current sensor
-        bar_layout = self.get_widget_attr(settings.OBJECT_NAMES.current_bar_layout)
+        layout = QVBoxLayout()
         progress_bar_widget = QProgressBar(self._widget)
         progress_bar_widget.setOrientation(QtCore.Qt.Vertical)
         progress_bar_widget.setMaximum(10000)
-        bar_layout.addWidget(progress_bar_widget)
+        progress_bar_widget.setAlignment(QtCore.Qt.AlignCenter)
+        layout.addWidget(progress_bar_widget, alignment=QtCore.Qt.AlignCenter)
+        label = QLabel(self._widget)
+        label.setText('Sensor %i' % current_sensor_index)
+        label.setAlignment(QtCore.Qt.AlignCenter)
+        label.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+        layout.addWidget(label)
+        # Add new progress bar to the main window
+        all_bar_layout = self.get_widget_attr(settings.OBJECT_NAMES.current_bar_layout)
+        all_bar_layout.addLayout(layout)
+
+        # LEFT OFF - random colors for lines
+        # Next - improve graph
+        # Next - add labels to bars
+        # Next -customiatingion?
 
         current_sensor_display = current_display.CurrentDisplay(data_line, progress_bar_widget)
         self.current_sensor_displays.append(current_sensor_display)
@@ -149,7 +171,7 @@ class CurrentSensorPlugin(Plugin):
             try:
                 self.current_sensor_displays[index].update_outputs(plot_time.to_sec(), current_measurement)
             except IndexError:
-                self.add_current_sensor_display()
+                self.grow_current_sensor_display()
                 self.current_sensor_displays[index].update_outputs(plot_time.to_sec(), current_measurement)
 
 
