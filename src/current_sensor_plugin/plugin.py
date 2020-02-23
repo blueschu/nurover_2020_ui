@@ -3,7 +3,7 @@ Current sensor plotting plugin for Watney Mk. 2.
 
 For a brief pyqtgraph tutorial, see https://www.learnpyqt.com/courses/graphics-plotting/plotting-pyqtgraph/
 For a tutorial on adding pyqtgraph widgets with QtCreator, see https://www.learnpyqt.com/courses/qt-creator/embed-pyqtgraph-custom-widgets-qt-app/
-
+For a tutorial on creating slots/signals, see https://www.pythoncentral.io/pysidepyqt-tutorial-creating-your-own-signals-and-slots/.
 """
 
 import os
@@ -22,36 +22,7 @@ except:
           "to install this dependency."
     raise
 
-from . import settings
-
-
-import random
-
-class CurrentDisplay(object):
-    """
-    Container class for all of the widgets associated with a given motor's current data.
-    """
-
-    def __init__(self, plot_data_line, progress_bar_widget, max_measurements=50):
-        self._plot_data_line = plot_data_line
-        self._progress_bar_widget = progress_bar_widget
-        self._max_measurements = max_measurements
-        self._data_time = []
-        self._data_current = []
-
-    def update_outputs(self, time_secs, current_measurement):
-        self._data_time.append(time_secs)
-        self._data_current.append(current_measurement)
-
-        for data_list in (self._data_time, self._data_current):
-            if len(data_list) > self._max_measurements:
-                data_list.pop(0)
-
-        self._plot_data_line.setData(self._data_time, self._data_current)
-        self._progress_bar_widget.setValue(random.randint(0, 10))
-
-    def set_bar_value(self, current_measurement):
-        pass
+from . import settings, current_display
 
 
 class CurrentSensorPlugin(Plugin):
@@ -132,8 +103,8 @@ class CurrentSensorPlugin(Plugin):
         # Add Title
         # widget.setTitle("Motor Currents", color='blue', size=30)
         # Add Axis Labels
-        widget.setLabel('left', 'Current (Amps)', color='red', size=30)
-        widget.setLabel('bottom', 'Time (s)', color='red', size=30)
+        widget.setLabel('left', 'Current (Amps)', color='blue', size=30)
+        widget.setLabel('bottom', 'Time (s)', color='blue', size=30)
         # Add legend
         widget.addLegend()
         # Add grid
@@ -158,9 +129,10 @@ class CurrentSensorPlugin(Plugin):
         bar_layout = self.get_widget_attr(settings.OBJECT_NAMES.current_bar_layout)
         progress_bar_widget = QProgressBar(self._widget)
         progress_bar_widget.setOrientation(QtCore.Qt.Vertical)
+        progress_bar_widget.setMaximum(10000)
         bar_layout.addWidget(progress_bar_widget)
 
-        current_sensor_display = CurrentDisplay(data_line, progress_bar_widget)
+        current_sensor_display = current_display.CurrentDisplay(data_line, progress_bar_widget)
         self.current_sensor_displays.append(current_sensor_display)
 
     @QtCore.pyqtSlot(tuple)

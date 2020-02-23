@@ -27,58 +27,7 @@
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="current_bar_layout">
-       <item>
-        <widget class="QProgressBar" name="progressBar">
-         <property name="palette">
-          <palette>
-           <active>
-            <colorrole role="Highlight">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>138</red>
-               <green>226</green>
-               <blue>52</blue>
-              </color>
-             </brush>
-            </colorrole>
-           </active>
-           <inactive>
-            <colorrole role="Highlight">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>138</red>
-               <green>226</green>
-               <blue>52</blue>
-              </color>
-             </brush>
-            </colorrole>
-           </inactive>
-           <disabled>
-            <colorrole role="Highlight">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>145</red>
-               <green>141</green>
-               <blue>126</blue>
-              </color>
-             </brush>
-            </colorrole>
-           </disabled>
-          </palette>
-         </property>
-         <property name="value">
-          <number>24</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <layout class="QHBoxLayout" name="current_bar_layout"/>
      </item>
     </layout>
    </item>

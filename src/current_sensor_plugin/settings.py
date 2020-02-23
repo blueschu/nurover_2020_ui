@@ -22,6 +22,7 @@ class _ObjectNames(object):
 
     current_bar_layout = 'current_bar_layout'
 
+
 ROS_TOPICS = _RosTopics()
 
 OBJECT_NAMES = _ObjectNames()
@@ -36,4 +37,13 @@ The amount of time for which new current messages will be ignored after displayi
 a set of current measurements. Increase this value to improve plotting performance.
 """
 
-
+CURRENT_BAR_COLOR_THRESHOLDS = [
+    (0, (0x8A, 0xE2, 0x34)),
+    (1500, (0x4E, 0x9A, 0x06)),
+    (3000, (0xFC, 0xE9, 0x4F)),
+    (5000, (0xFC, 0xAF, 0x3E)),
+    (6800, (0xEF, 0x29, 0x29)),
+]
+"""
+Thresholds in milliamps for current sensor bar colors.
+"""
