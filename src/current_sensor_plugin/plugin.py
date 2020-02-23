@@ -6,6 +6,12 @@ For a tutorial on adding pyqtgraph widgets with QtCreator, see https://www.learn
 For a tutorial on creating slots/signals, see https://www.pythoncentral.io/pysidepyqt-tutorial-creating-your-own-signals-and-slots/.
 For QtCore.Qt constants: https://doc.qt.io/qtforpython/PySide2/QtCore/Qt.html
 
+
+Tentative Pre-Competition Improvements
+- Allow for live selection of sensor colors
+- Save chosen sensor color between sessions
+- Allow for live selection of color thresholds
+- Allow for live selection of colors associated with color thresholds
 """
 
 import os
@@ -13,8 +19,8 @@ import random
 import rospy
 
 from qt_gui.plugin import Plugin
-from python_qt_binding import loadUi, QtCore
-from python_qt_binding.QtWidgets import QWidget, QVBoxLayout, QProgressBar, QLabel, QFrame
+from python_qt_binding import loadUi, QtCore, QtGui
+from python_qt_binding.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QProgressBar, QLabel, QFrame
 
 try:
     import pyqtgraph
@@ -29,7 +35,6 @@ from . import settings, current_display
 
 
 class CurrentSensorPlugin(Plugin):
-
     some_sig = QtCore.pyqtSignal(tuple)
 
     def __init__(self, context):
@@ -114,8 +119,8 @@ class CurrentSensorPlugin(Plugin):
         widget.showGrid(x=True, y=True)
         # Set Range
         widget.setYRange(0, 10, padding=0)
-        for threshold, (r,g,b) in settings.CURRENT_BAR_COLOR_THRESHOLDS:
-            widget.addLine(y=threshold/1000, pen=pyqtgraph.mkPen(r,g,b, style=QtCore.Qt.DotLine, width=1.6))
+        for threshold, (r, g, b) in settings.CURRENT_BAR_COLOR_THRESHOLDS:
+            widget.addLine(y=float(threshold) / 1000, pen=pyqtgraph.mkPen(r, g, b, style=QtCore.Qt.DotLine, width=1.6))
 
     def grow_current_sensor_display(self):
         """
@@ -125,13 +130,19 @@ class CurrentSensorPlugin(Plugin):
         an additional progress bar to represent new current sensor.
         """
         current_sensor_index = len(self.current_sensor_displays) + 1
+        # Pick a known distinctive color if one is still available. Otherwise, generate
+        # a random color for the new sensor.
+        try:
+            sensor_color = settings.DEFAULT_SENSOR_COLORS[current_sensor_index - 1]
+        except IndexError:
+            sensor_color = tuple(random.randint(0, 255) for _ in range(3))
 
         # Create pyqtgraph plot dataline for the new current sensor
         plot_widget = self.get_widget_attr(settings.OBJECT_NAMES.current_plot)
         plot_widget.setTitle('Live Current Sensor Telemetry')
-        # Select random color for the new pen. TODO Created predetermined list of distinctive pen colors.
-        pen = pyqtgraph.mkPen(tuple(random.randint(0, 255) for _ in range(3)), style=QtCore.Qt.SolidLine, width=2)
-        data_line = plot_widget.plot([], [], name='Sensor %i' % current_sensor_index, pen=pen, symbol='+')
+        pen = pyqtgraph.mkPen(sensor_color, style=QtCore.Qt.SolidLine, width=2)
+        data_line = plot_widget.plot([], [], name='Sensor %i' % current_sensor_index,
+                                     pen=pen)  # possible include symbol='+'
 
         # Create a progress bar for the new current sensor
         layout = QVBoxLayout()
@@ -140,21 +151,30 @@ class CurrentSensorPlugin(Plugin):
         progress_bar_widget.setMaximum(10000)
         progress_bar_widget.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(progress_bar_widget, alignment=QtCore.Qt.AlignCenter)
+        # Create a layout for displaying the sensor's color and value
+        label_layout = QHBoxLayout()
+        label_pixamp = QtGui.QPixmap(10, 10)
+        label_pixamp.fill(QtGui.QColor(*sensor_color))
+        label_color = QLabel(self._widget)
+        label_color.setPixmap(label_pixamp)
+        label_color.setFixedWidth(10)
+        label_layout.addWidget(label_color)
+        label_measurement = QLabel(self._widget)
+        label_measurement.setAlignment(QtCore.Qt.AlignCenter)
+        label_layout.addWidget(label_measurement)
+        layout.addLayout(label_layout)
+        # Add sensor name label
         label = QLabel(self._widget)
         label.setText('Sensor %i' % current_sensor_index)
         label.setAlignment(QtCore.Qt.AlignCenter)
         label.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         layout.addWidget(label)
+
         # Add new progress bar to the main window
         all_bar_layout = self.get_widget_attr(settings.OBJECT_NAMES.current_bar_layout)
         all_bar_layout.addLayout(layout)
 
-        # LEFT OFF - random colors for lines
-        # Next - improve graph
-        # Next - add labels to bars
-        # Next -customiatingion?
-
-        current_sensor_display = current_display.CurrentDisplay(data_line, progress_bar_widget)
+        current_sensor_display = current_display.CurrentDisplay(data_line, progress_bar_widget, label_measurement)
         self.current_sensor_displays.append(current_sensor_display)
 
     @QtCore.pyqtSlot(tuple)
@@ -173,7 +193,6 @@ class CurrentSensorPlugin(Plugin):
             except IndexError:
                 self.grow_current_sensor_display()
                 self.current_sensor_displays[index].update_outputs(plot_time.to_sec(), current_measurement)
-
 
     def get_widget_attr(self, attr):
         """

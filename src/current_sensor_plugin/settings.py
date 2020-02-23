@@ -38,7 +38,7 @@ a set of current measurements. Increase this value to improve plotting performan
 """
 
 CURRENT_BAR_COLOR_THRESHOLDS = [
-    (0, (0x8A, 0xE2, 0x34)),
+    (0000, (0x8A, 0xE2, 0x34)),
     (1500, (0x4E, 0x9A, 0x06)),
     (3000, (0xFC, 0xE9, 0x4F)),
     (5000, (0xFC, 0xAF, 0x3E)),
@@ -46,4 +46,17 @@ CURRENT_BAR_COLOR_THRESHOLDS = [
 ]
 """
 Thresholds in milliamps for current sensor bar colors.
+"""
+
+DEFAULT_SENSOR_COLORS = [
+    (0x3c, 0xb4, 0x4b),
+    (0x43, 0x63, 0xd8),
+    (0x42, 0xd4, 0xf4),
+    (0x91, 0x1e, 0xb4),
+    (0x9A, 0x63, 0x24),
+    (0xf5, 0x82, 0x31),
+]
+"""
+The color used to represented the first N current sensors displayed by this plugin.
+Additional sensors will be represented by randomly chosen colors.
 """

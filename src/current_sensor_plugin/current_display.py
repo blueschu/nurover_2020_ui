@@ -10,22 +10,21 @@ class CurrentDisplay(object):
     Container class for all of the widgets associated with a given motor's current data.
     """
 
-    def __init__(self, plot_data_line, progress_bar_widget, max_measurements=35):
+    def __init__(self, plot_data_line, progress_bar_widget, progress_bar_label_widget, max_measurements=120):
         self._plot_data_line = plot_data_line
         self._progress_bar_widget = progress_bar_widget
+        self._progress_bar_label_widget = progress_bar_label_widget
         self._max_measurements = max_measurements
         self._data_time = []
         self._data_current = []
-        self._data_finger = 0
 
     def update_outputs(self, time_secs, current_measurement):
-        if len(self._data_time) == self._max_measurements:
-            self._data_time[self._data_finger] = time_secs
-            self._data_current[self._data_finger] = current_measurement
-            self._data_finger = (self._data_finger + 1) % self._max_measurements
-        else:
-            self._data_time.append(time_secs)
-            self._data_current.append(current_measurement)
+        self._data_time.append(time_secs)
+        self._data_current.append(current_measurement)
+
+        if len(self._data_time) > self._max_measurements:
+            self._data_time.pop(0)
+            self._data_current.pop(0)
 
         # Update the plot associated with this current sensor
         self._plot_data_line.setData(self._data_time, self._data_current)
@@ -37,6 +36,7 @@ class CurrentDisplay(object):
         palette.setColor(QtGui.QPalette.Highlight, self._color_for_current(current_measurement))
         self._progress_bar_widget.setPalette(palette)
         self._progress_bar_widget.setValue(current_measurement * 1000)
+        self._progress_bar_label_widget.setText('%6i mA' % (current_measurement * 1000))
 
 
     def _color_for_current(self, current_measurement):
