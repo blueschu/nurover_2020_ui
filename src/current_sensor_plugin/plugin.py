@@ -109,7 +109,7 @@ class CurrentSensorPlugin(Plugin):
         # Add Background colour to white
         widget.setBackground('w')
         # Add Title
-        # widget.setTitle("Motor Currents", color='blue', size=30)
+        widget.setTitle('Live Current Sensor Telemetry')
         # Add Axis Labels
         widget.setLabel('left', 'Current (Amps)', size=30)
         widget.setLabel('bottom', 'Time (s)', size=30)
@@ -139,7 +139,6 @@ class CurrentSensorPlugin(Plugin):
 
         # Create pyqtgraph plot dataline for the new current sensor
         plot_widget = self.get_widget_attr(settings.OBJECT_NAMES.current_plot)
-        plot_widget.setTitle('Live Current Sensor Telemetry')
         pen = pyqtgraph.mkPen(sensor_color, style=QtCore.Qt.SolidLine, width=2)
         data_line = plot_widget.plot([], [], name='Sensor %i' % current_sensor_index,
                                      pen=pen)  # possible include symbol='+'
