@@ -65,11 +65,6 @@ class LifeDetectionPlugin(Plugin):
             settings.ROS_TOPICS.vibration_motor_activation.type,
         )
 
-        self.undetermined_pub = rospy.Publisher(
-            settings.ROS_TOPICS.undetermined.topic,
-            settings.ROS_TOPICS.undetermined.type,
-        )
-
         # Create the collection site objects used by this plugin
         self.collection_sites = [
             collection_sites.CollectionSite(name_index, actuator_position)
@@ -153,7 +148,6 @@ class LifeDetectionPlugin(Plugin):
         self.water_solenoid_pub.unregister()
         self.vacuum_activation_pub.unregister()
         self.vibration_motor_activation_pub.unregister()
-        self.undetermined_pub.unregister()
 
     def save_settings(self, plugin_settings, instance_settings):
         # TODO save intrinsic configuration, usually using:
@@ -200,32 +194,29 @@ class LifeDetectionPlugin(Plugin):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['vacuum'])
         if checked:
             button.setText("Running")
+            self.set_icon(button, QStyle.SP_DialogYesButton)
             self.vacuum_activation_pub.publish(
                 settings.ROS_TOPICS.vibration_motor_activation.type(True)
             )
-            self.set_icon(button, QStyle.SP_DialogYesButton)
-            self.undetermined_pub.publish("Running vacuum")
 
             # If the valve is currently close, register that there is now dirt in the vacuum chamber
             if not self.check_control_on('valve'):
                 self.dirt_in_vacuum_chamber = True
         else:
             button.setText("Not Running")
+            self.set_icon(button, QStyle.SP_DialogNoButton)
             self.vacuum_activation_pub.publish(
                 settings.ROS_TOPICS.vibration_motor_activation.type(False)
             )
-            self.set_icon(button, QStyle.SP_DialogNoButton)
-            self.undetermined_pub.publish("Stopping vacuum")
 
     def on_toggle_control_valve(self, checked):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['valve'])
         if checked:
             button.setText("Open")
+            self.set_icon(button, QStyle.SP_DialogYesButton)
             self.valve_servo_pub.publish(
                 settings.ROS_TOPICS.valve_servo.type(True)
             )
-            self.set_icon(button, QStyle.SP_DialogYesButton)
-            self.undetermined_pub.publish("Opening Valve")
 
             # If there is dirt currently in the vacuum, register that is is now in the active collection site
             if self.dirt_in_vacuum_chamber and self.active_collection_site.is_empty:
@@ -234,49 +225,44 @@ class LifeDetectionPlugin(Plugin):
                 self.dirt_in_vacuum_chamber = False
         else:
             button.setText("Closed")
+            self.set_icon(button, QStyle.SP_DialogNoButton)
             self.valve_servo_pub.publish(
                 settings.ROS_TOPICS.valve_servo.type(False)
             )
-            self.set_icon(button, QStyle.SP_DialogNoButton)
-            self.undetermined_pub.publish("Closing Valve")
 
     def on_toggle_control_vibration(self, checked):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['vibration'])
         if checked:
             button.setText("Running")
+            self.set_icon(button, QStyle.SP_DialogYesButton)
             self.vibration_motor_activation_pub.publish(
                 settings.ROS_TOPICS.vibration_motor_activation.type(True)
             )
-            self.set_icon(button, QStyle.SP_DialogYesButton)
-            self.undetermined_pub.publish("Running vibration motors")
         else:
             button.setText("Not Running")
+            self.set_icon(button, QStyle.SP_DialogNoButton)
             self.vibration_motor_activation_pub.publish(
                 settings.ROS_TOPICS.vibration_motor_activation.type(False)
             )
-            self.set_icon(button, QStyle.SP_DialogNoButton)
-            self.undetermined_pub.publish("Stopping vibration motors")
 
     def on_toggle_control_pump(self, checked):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['pump'])
         if checked:
             button.setText("Running")
+            self.set_icon(button, QStyle.SP_DialogYesButton)
             self.water_solenoid_pub.publish(
                 settings.ROS_TOPICS.water_solenoid.type(True)
             )
-            self.set_icon(button, QStyle.SP_DialogYesButton)
-            self.undetermined_pub.publish("Running pump")
 
             if self.active_collection_site.is_filled:
                 self.active_collection_site.status = collection_sites.SiteStatus.Used
                 self.refresh_collection_site_pixmaps()
         else:
             button.setText("Not Running")
+            self.set_icon(button, QStyle.SP_DialogNoButton)
             self.water_solenoid_pub.publish(
                 settings.ROS_TOPICS.water_solenoid.type(False)
             )
-            self.set_icon(button, QStyle.SP_DialogNoButton)
-            self.undetermined_pub.publish("Stopping pump")
 
     def on_run_routine_collect(self):
         """
