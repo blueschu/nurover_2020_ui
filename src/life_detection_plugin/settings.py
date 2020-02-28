@@ -20,6 +20,12 @@ class _RosTopics(object):
 
     vibration_motor_activation = _Topic("/ld/motors", msg.Bool)
 
+    @classmethod
+    def all_topics(cls):
+        for attr in cls.__dict__.values():
+            if isinstance(attr, cls._Topic):
+                yield attr
+
 
 class _ObjectNames(object):
     """
