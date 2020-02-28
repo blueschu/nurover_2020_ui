@@ -6,6 +6,10 @@ from std_msgs import msg
 
 
 class _RosTopics(object):
+    """
+    Mock namespace object to simplify the access to and iteration of the ROS
+    Topics used by this plugin.
+    """
     _Topic = namedtuple('_Topic', ['topic', 'type'])
 
     actuator_position = _Topic("/ld/actuator_servo", msg.UInt8)
