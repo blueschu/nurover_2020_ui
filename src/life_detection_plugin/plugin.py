@@ -34,10 +34,37 @@ class LifeDetectionPlugin(Plugin):
         context.add_widget(self._widget)
 
         # Create publisher instances for the the ROS topics this plugin writes to
+
         self.actuator_button_pub = rospy.Publisher(
             settings.ROS_TOPICS.actuator_position.topic,
             settings.ROS_TOPICS.actuator_position.type,
         )
+
+        self.linkage_servo_pub = rospy.Publisher(
+            settings.ROS_TOPICS.linkage_servo.topic,
+            settings.ROS_TOPICS.linkage_servo.type,
+        )
+
+        self.valve_servo_pub = rospy.Publisher(
+            settings.ROS_TOPICS.valve_servo.topic,
+            settings.ROS_TOPICS.valve_servo.type,
+        )
+
+        self.water_solenoid_pub = rospy.Publisher(
+            settings.ROS_TOPICS.water_solenoid.topic,
+            settings.ROS_TOPICS.water_solenoid.type,
+        )
+
+        self.vacuum_activation_pub = rospy.Publisher(
+            settings.ROS_TOPICS.vacuum_activation.topic,
+            settings.ROS_TOPICS.vacuum_activation.type,
+        )
+
+        self.vibration_motor_activation_pub = rospy.Publisher(
+            settings.ROS_TOPICS.vibration_motor_activation.topic,
+            settings.ROS_TOPICS.vibration_motor_activation.type,
+        )
+
         self.undetermined_pub = rospy.Publisher(
             settings.ROS_TOPICS.undetermined.topic,
             settings.ROS_TOPICS.undetermined.type,
@@ -121,6 +148,11 @@ class LifeDetectionPlugin(Plugin):
         Un-register all ROS publishers.
         """
         self.actuator_button_pub.unregister()
+        self.linkage_servo_pub.unregister()
+        self.valve_servo_pub.unregister()
+        self.water_solenoid_pub.unregister()
+        self.vacuum_activation_pub.unregister()
+        self.vibration_motor_activation_pub.unregister()
         self.undetermined_pub.unregister()
 
     def save_settings(self, plugin_settings, instance_settings):
@@ -168,6 +200,9 @@ class LifeDetectionPlugin(Plugin):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['vacuum'])
         if checked:
             button.setText("Running")
+            self.vacuum_activation_pub.publish(
+                settings.ROS_TOPICS.vibration_motor_activation.type(True)
+            )
             self.set_icon(button, QStyle.SP_DialogYesButton)
             self.undetermined_pub.publish("Running vacuum")
 
@@ -176,6 +211,9 @@ class LifeDetectionPlugin(Plugin):
                 self.dirt_in_vacuum_chamber = True
         else:
             button.setText("Not Running")
+            self.vacuum_activation_pub.publish(
+                settings.ROS_TOPICS.vibration_motor_activation.type(False)
+            )
             self.set_icon(button, QStyle.SP_DialogNoButton)
             self.undetermined_pub.publish("Stopping vacuum")
 
@@ -183,6 +221,9 @@ class LifeDetectionPlugin(Plugin):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['valve'])
         if checked:
             button.setText("Open")
+            self.valve_servo_pub.publish(
+                settings.ROS_TOPICS.valve_servo.type(True)
+            )
             self.set_icon(button, QStyle.SP_DialogYesButton)
             self.undetermined_pub.publish("Opening Valve")
 
@@ -193,6 +234,9 @@ class LifeDetectionPlugin(Plugin):
                 self.dirt_in_vacuum_chamber = False
         else:
             button.setText("Closed")
+            self.valve_servo_pub.publish(
+                settings.ROS_TOPICS.valve_servo.type(False)
+            )
             self.set_icon(button, QStyle.SP_DialogNoButton)
             self.undetermined_pub.publish("Closing Valve")
 
@@ -200,10 +244,16 @@ class LifeDetectionPlugin(Plugin):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['vibration'])
         if checked:
             button.setText("Running")
+            self.vibration_motor_activation_pub.publish(
+                settings.ROS_TOPICS.vibration_motor_activation.type(True)
+            )
             self.set_icon(button, QStyle.SP_DialogYesButton)
             self.undetermined_pub.publish("Running vibration motors")
         else:
             button.setText("Not Running")
+            self.vibration_motor_activation_pub.publish(
+                settings.ROS_TOPICS.vibration_motor_activation.type(False)
+            )
             self.set_icon(button, QStyle.SP_DialogNoButton)
             self.undetermined_pub.publish("Stopping vibration motors")
 
@@ -211,6 +261,9 @@ class LifeDetectionPlugin(Plugin):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['pump'])
         if checked:
             button.setText("Running")
+            self.water_solenoid_pub.publish(
+                settings.ROS_TOPICS.water_solenoid.type(True)
+            )
             self.set_icon(button, QStyle.SP_DialogYesButton)
             self.undetermined_pub.publish("Running pump")
 
@@ -219,6 +272,9 @@ class LifeDetectionPlugin(Plugin):
                 self.refresh_collection_site_pixmaps()
         else:
             button.setText("Not Running")
+            self.water_solenoid_pub.publish(
+                settings.ROS_TOPICS.water_solenoid.type(False)
+            )
             self.set_icon(button, QStyle.SP_DialogNoButton)
             self.undetermined_pub.publish("Stopping pump")
 

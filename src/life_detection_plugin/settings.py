@@ -8,7 +8,17 @@ from std_msgs import msg
 class _RosTopics(object):
     _Topic = namedtuple('_Topic', ['topic', 'type'])
 
-    actuator_position = _Topic("/life_detection/actuator_position", msg.UInt8)
+    actuator_position = _Topic("/ld/actuator_servo", msg.UInt8)
+
+    linkage_servo = _Topic("/ld/linkage_servo", msg.Float32)
+
+    valve_servo = _Topic("/ld/trapdoor_servo", msg.Float32)
+
+    water_solenoid = _Topic("ld/solenoid", msg.Bool)
+
+    vacuum_activation = _Topic("ld/vacuum", msg.Bool)
+
+    vibration_motor_activation = _Topic("/ld/motors", msg.Bool)
 
     undetermined = _Topic("/undetermined_topic", msg.String)
 
@@ -45,6 +55,7 @@ class _ObjectNames(object):
 
     sync_label = 'sync_label'
 
+
 ROUTINE_TIMER_TICK = 5
 
 ROS_TOPICS = _RosTopics()
@@ -76,8 +87,8 @@ IMPORTANT_MESSAGES = [
 
 COLLECTION_SITE_POSITIONS = [
     0,
-    64,
-    128,
-    192,
-    255
+    1,
+    2,
+    3,
+    4,
 ]
