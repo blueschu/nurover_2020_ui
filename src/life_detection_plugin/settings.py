@@ -12,15 +12,13 @@ class _RosTopics(object):
 
     linkage_servo = _Topic("/ld/linkage_servo", msg.Float32)
 
-    valve_servo = _Topic("/ld/trapdoor_servo", msg.Float32)
+    valve_servo = _Topic("/ld/trapdoor_servo", msg.Bool)
 
     water_solenoid = _Topic("ld/solenoid", msg.Bool)
 
     vacuum_activation = _Topic("ld/vacuum", msg.Bool)
 
     vibration_motor_activation = _Topic("/ld/motors", msg.Bool)
-
-    undetermined = _Topic("/undetermined_topic", msg.String)
 
 
 class _ObjectNames(object):
