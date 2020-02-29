@@ -91,10 +91,6 @@ class LifeDetectionPlugin(Plugin):
                 getattr(self, 'on_toggle_control_{}'.format(button_key))
             )
 
-        self.get_widget_attr(settings.OBJECT_NAMES.control_button['vacuum']).toggled.connect(
-            self.on_toggle_control_vacuum
-        )
-
     def set_startup_icons(self):
         # Set button icons
         def _set_icon(widget, icon):
