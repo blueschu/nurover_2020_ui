@@ -439,7 +439,7 @@
                </size>
               </property>
               <property name="text">
-               <string>Raise/Lower Vacuum</string>
+               <string>Move Linkage Servo</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -447,22 +447,49 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="button_vacuum_up">
-              <property name="text">
-               <string/>
-              </property>
-              <property name="icon">
-               <iconset theme="/button_action/add">
-                <normaloff>.</normaloff>.</iconset>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="button_vacuum_down">
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <widget class="QSlider" name="linkage_slider">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="tracking">
+                 <bool>true</bool>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="invertedAppearance">
+                 <bool>true</bool>
+                </property>
+                <property name="invertedControls">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_3">
+                <item>
+                 <widget class="QPushButton" name="button_vacuum_up">
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset theme="/button_action/add">
+                    <normaloff>.</normaloff>.</iconset>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="button_vacuum_down">
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
             </item>
            </layout>
           </item>

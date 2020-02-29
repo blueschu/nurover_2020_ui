@@ -51,9 +51,32 @@ class LifeDetectionPlugin(Plugin):
         self.dirt_in_vacuum_chamber = False
         # Whether a life detection is currently running. Only one may run at a time.
         self._routine_running = False
+        # Whether the linkage servo is currently being sent new position messages
+        self._moving_linkage_servo = False
+
+        # Setup the QTimer's for controlling the position of the linkage servo.
+
+        # QTimer to periodically published the slider position while the button
+        # is being held down. This timer MUST be stopped with the linkage_timer_move_slider's callback.
+        self.linkage_timer_publish = QtCore.QTimer()
+        self.linkage_timer_publish.timeout.connect(self.publish_current_linkage_slider_position)
+
+        # QTimer to periodically update the position of the the linkage servo slider while
+        # a linkage servo control button is pressed.
+        # The timeout signal handler for this QTimer is set at runtime by the callbacks produced by
+        # `self.make_on_pressed_linkage_servo_callback`. During initialization, the signal handler
+        # is set to a no-op lambda since it cannot be empty when the callbacks returned by
+        # `self.make_on_pressed_linkage_servo_callback` attempt to disconnect it.
+        self.linkage_timer_move_slider = QtCore.QTimer()
+        self.linkage_timer_move_slider.timeout.connect(lambda : None)
 
         self.register_signals()
         self.set_startup_icons()
+
+        # Ensure the linkage servo slider has the desired range
+        slider = self.get_widget_attr(settings.OBJECT_NAMES.linkage_slider)
+        slider.setMinimum(0)
+        slider.setMaximum(settings.LINKAGE_SERVOS_SLIDER_RESOLUTION - 1)
 
     def get_widget_attr(self, attr):
         """
@@ -74,10 +97,7 @@ class LifeDetectionPlugin(Plugin):
                 self.make_collection_site_select_callback(site)
             )
 
-        self.get_widget_attr(settings.OBJECT_NAMES.reset_collection_states_button).clicked.connect(
-            self.on_click_reset_collection_states
-        )
-
+        # Register signals for the routine buttons
         for routine_name, object_name in settings.OBJECT_NAMES.routine_button.items():
             self.get_widget_attr(object_name).clicked.connect(
                 # Generate the method name that is responsible for handling the clock signal for the routine button
@@ -91,14 +111,34 @@ class LifeDetectionPlugin(Plugin):
                 getattr(self, 'on_toggle_control_{}'.format(button_key))
             )
 
+        # Register signals for miscellaneous remaining buttons
+        self.get_widget_attr(settings.OBJECT_NAMES.reset_collection_states_button).clicked.connect(
+            self.on_click_reset_collection_states
+        )
+        self.get_widget_attr(settings.OBJECT_NAMES.button_linkage_up).pressed.connect(
+            self.make_on_pressed_linkage_servo_callback(direction='up')
+        )
+        self.get_widget_attr(settings.OBJECT_NAMES.button_linkage_up).released.connect(
+            self.on_released_linkage_servo
+        )
+        self.get_widget_attr(settings.OBJECT_NAMES.button_linkage_down).pressed.connect(
+            self.make_on_pressed_linkage_servo_callback(direction='down')
+        )
+        self.get_widget_attr(settings.OBJECT_NAMES.button_linkage_down).released.connect(
+            self.on_released_linkage_servo
+        )
+        self.get_widget_attr(settings.OBJECT_NAMES.linkage_slider).sliderReleased.connect(
+            self.on_linkage_slider_released
+        )
+
     def set_startup_icons(self):
         # Set button icons
         def _set_icon(widget, icon):
             w = self.get_widget_attr(widget)
             w.setIcon(w.style().standardIcon(icon))
 
-        self.set_icon(settings.OBJECT_NAMES.button_vacuum_up, QStyle.SP_ArrowUp)
-        self.set_icon(settings.OBJECT_NAMES.button_vacuum_down, QStyle.SP_ArrowDown)
+        self.set_icon(settings.OBJECT_NAMES.button_linkage_up, QStyle.SP_ArrowUp)
+        self.set_icon(settings.OBJECT_NAMES.button_linkage_down, QStyle.SP_ArrowDown)
         self.set_icon(settings.OBJECT_NAMES.reset_collection_states_button, QStyle.SP_TrashIcon)
 
         style = QCommonStyle()
@@ -116,7 +156,6 @@ class LifeDetectionPlugin(Plugin):
         """
         for pub in self.publishers.values():
             pub.unregister()
-
 
     def save_settings(self, plugin_settings, instance_settings):
         # TODO save intrinsic configuration, usually using:
@@ -160,6 +199,75 @@ class LifeDetectionPlugin(Plugin):
         for site in self.collection_sites:
             site.status = collection_sites.SiteStatus.Empty
         self.refresh_collection_site_pixmaps()
+
+    def make_on_pressed_linkage_servo_callback(self, direction):
+        """
+        Construct the callback that should be call when a linkage servo control button is pressed.
+        """
+        if direction not in ('up', 'down'):
+            raise ValueError("Linkage servo button direction must be either 'up' or 'down'")
+        direction_factor = 1 if direction == 'down' else -1
+
+        def _on_linkage_slider_timer_timeout():
+            """
+            Signal handler for when the `self.linkage_timer_move_slider` QTimer reaches its timeout.
+
+            Updates the position of the linkage servo slide.
+            """
+            slider_min, slider_max = (0, settings.LINKAGE_SERVOS_SLIDER_RESOLUTION)
+            new_value = self.get_widget_attr(settings.OBJECT_NAMES.linkage_slider).value() + direction_factor
+            if new_value > slider_max:
+                new_value = slider_max
+            elif new_value < slider_min:
+                new_value = slider_min
+            self.get_widget_attr(settings.OBJECT_NAMES.linkage_slider).setValue(new_value)
+
+        def _on_pressed_linkage_servo():
+            """
+            Signal handler for when either the linkage servo "up" or "down" button is pressed.
+            """
+            # Ensure that the slider moves at least once per button click, and that at least one
+            # message is published
+            _on_linkage_slider_timer_timeout()
+            self.publish_current_linkage_slider_position()
+
+            # Start the timers
+            self.linkage_timer_publish.start(settings.LINKAGE_SERVO_MESSAGE_RATE)
+            self.linkage_timer_move_slider.disconnect()
+            self.linkage_timer_move_slider.timeout.connect(_on_linkage_slider_timer_timeout)
+            self.linkage_timer_move_slider.start(
+                settings.LINKAGE_SERVO_SLIDER_TOTAL_MOVEMENT_DURATION / float(settings.LINKAGE_SERVOS_SLIDER_RESOLUTION - 1)
+            )
+
+        return _on_pressed_linkage_servo
+
+    def on_released_linkage_servo(self):
+        """
+        Signal handler for when either the linkage servo "up" or "down" button is released by the user.
+        """
+        # The button was released! Stop the timers.
+        self.linkage_timer_publish.stop()
+        self.linkage_timer_move_slider.stop()
+
+    def on_linkage_slider_released(self):
+        """
+        Signal handler for when the user releases the linkage slider after manipulating it.
+        """
+        self.publish_current_linkage_slider_position()
+
+    def publish_current_linkage_slider_position(self):
+        """
+        Publish a message to the linkage servo's ROS topic indicating the new position for the
+        linkage servo.
+        """
+        # The range of possible values for the linkage servo message
+        message_range = settings.LINKAGE_SERVO_MESSAGE_RANGE[1] - settings.LINKAGE_SERVO_MESSAGE_RANGE[0]
+        # The increase in the message payload associated with each increment on the slider
+        slider_step = message_range / (settings.LINKAGE_SERVOS_SLIDER_RESOLUTION - 1)
+
+        payload = settings.LINKAGE_SERVO_MESSAGE_RANGE[0]
+        payload += slider_step * self.get_widget_attr(settings.OBJECT_NAMES.linkage_slider).value()
+        self.ros_publish_message(settings.ROS_TOPICS.linkage_servo, payload)
 
     def on_toggle_control_vacuum(self, checked):
         button = self.get_widget_attr(settings.OBJECT_NAMES.control_button['vacuum'])

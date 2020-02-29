@@ -57,9 +57,11 @@ class _ObjectNames(object):
 
     progress_bar_layout = 'progress_bars'
 
-    button_vacuum_up = 'button_vacuum_up'
+    button_linkage_up = 'button_vacuum_up'
 
-    button_vacuum_down = 'button_vacuum_down'
+    button_linkage_down = 'button_vacuum_down'
+
+    linkage_slider = 'linkage_slider'
 
     sync_label = 'sync_label'
 
@@ -100,3 +102,31 @@ COLLECTION_SITE_POSITIONS = [
     3,
     4,
 ]
+
+LINKAGE_SERVO_MESSAGE_RATE = 200
+"""
+Period in milliseconds elapsed between subsequent message publishes to the 
+linkage servo position.
+"""
+
+LINKAGE_SERVO_MESSAGE_RANGE = (-90, 90)
+"""
+The range of allowed values for the linkage's servo ROS topic.
+"""
+
+LINKAGE_SERVOS_SLIDER_RESOLUTION = LINKAGE_SERVO_MESSAGE_RANGE[1] - LINKAGE_SERVO_MESSAGE_RANGE[0] + 1
+"""
+The number of distinct position that the linkage slider should be able to take on.
+
+This setting also determines the number of distinct positions that this plugin will
+publish to the linkage servo's ROS topic.
+"""
+
+LINKAGE_SERVO_SLIDER_TOTAL_MOVEMENT_DURATION = 5000
+"""
+The number of milliseconds that it takes for the linkage servo to fully extend from
+retracted position.
+
+This value is used to compute the rate at which the linkage slider is changed while
+the linkage servo control buttons are depressed.
+"""
