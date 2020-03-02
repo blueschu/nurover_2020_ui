@@ -233,7 +233,7 @@ class LifeDetectionPlugin(Plugin):
 
             # Start the timers
             self.linkage_timer_publish.start(settings.LINKAGE_SERVO_MESSAGE_RATE)
-            self.linkage_timer_move_slider.disconnect()
+            self.linkage_timer_move_slider.timeout.disconnect()
             self.linkage_timer_move_slider.timeout.connect(_on_linkage_slider_timer_timeout)
             self.linkage_timer_move_slider.start(
                 settings.LINKAGE_SERVO_SLIDER_TOTAL_MOVEMENT_DURATION / float(settings.LINKAGE_SERVOS_SLIDER_RESOLUTION - 1)
